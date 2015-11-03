@@ -1,13 +1,18 @@
-<Page loaded="load">
+<Page loaded="loaded">
 	<Page.actionBar>
 		<ActionBar title="Sign up"></ActionBar>
 	</Page.actionBar>
-	<StackLayout>
-		<Image src="res://logo" stretch="none" horizontalAlignment="center"/>
+	<ScrollView>
+		<StackLayout>
+			<Image src="res://logo" stretch="none" horizontalAlignment="center" />
 
-		<TextField text="{{ email }}" id="email" hint="Email Address" keyboardType="email" />
-		<TextField text="{{ password }}" secure="true" hint="Password" />
+			<GridLayout rows="auto, auto">
+				<TextField text="{{ email }}" id="email" hint="Email Address" keyboardType="email" returnKeyType="next" returnPress="focusPassword" autocorrect="false" autocapitalizationType="none" row="0" />
+				<TextField text="{{ password }}" id="password" secure="true" hint="Password" returnKeyType="done" returnPress="register" row="1" />
+				<ActivityIndicator busy="{{ authenticating }}" rowSpan="2" />
+			</GridLayout>
 
-		<Button text="Sign Up" tap="register" />
-	</StackLayout>
+			<Button text="Sign Up" id="signUpButton" tap="register" />
+		</StackLayout>
+	</ScrollView>
 </Page>

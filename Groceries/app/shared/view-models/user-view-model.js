@@ -1,7 +1,6 @@
-var httpModule = require("http");
 var config = require("../../shared/config");
-var validator = require("email-validator/index");
 var observableModule = require("data/observable");
+var validator = require("email-validator");
 
 function User(info) {
 	info = info || {};
@@ -13,48 +12,51 @@ function User(info) {
 	});
 
 	viewModel.login = function() {
-		return new Promise(function(resolve, reject) {
-			httpModule.request({
-				url: config.apiUrl + "oauth/token",
-				method: "POST",
-				content: JSON.stringify({
-					username: viewModel.get("email"),
-					password: viewModel.get("password"),
-					grant_type: "password"
-				}),
-				headers: {
-					"Content-Type": "application/json"
-				}
-			}).then(function(data) {
-				config.token = data.content.toJSON().Result.access_token;
-				resolve();
-			}).catch(function(error) {
-				console.log(error);
-				reject();
-			});
+		return fetch(config.apiUrl + "oauth/token", {
+			method: "POST",
+			body: JSON.stringify({
+				username: viewModel.get("email"),
+				password: viewModel.get("password"),
+				grant_type: "password"
+			}),
+			headers: {
+				"Content-Type": "application/json"
+			}
+		})
+		.then(handleErrors)
+		.then(function(response) {
+			return response.json();
+		}).then(function(data) {
+			config.token = data.Result.access_token;
 		});
 	};
 
 	viewModel.register = function() {
-		return new Promise(function(resolve, reject) {
-			httpModule.request({
-				url: config.apiUrl + "Users",
-				method: "POST",
-				content: JSON.stringify({
-					Username: viewModel.get("email"),
-					Email: viewModel.get("email"),
-					Password: viewModel.get("password")
-				}),
-				headers: {
-					"Content-Type": "application/json"
-				}
-			}).then(function() {
-				resolve();
-			}).catch(function(error) {
-				console.log(error);
-				reject();
-			});
-		});
+		return fetch(config.apiUrl + "Users", {
+			method: "POST",
+			body: JSON.stringify({
+				Username: viewModel.get("email"),
+				Email: viewModel.get("email"),
+				Password: viewModel.get("password")
+			}),
+			headers: {
+				"Content-Type": "application/json"
+			}
+		})
+		.then(handleErrors);
+	};
+
+	viewModel.resetPassword = function() {
+		return fetch(config.apiUrl + "Users/resetpassword", {
+			method: "POST",
+			body: JSON.stringify({
+				Email: viewModel.get("email"),
+			}),
+			headers: {
+				"Content-Type": "application/json"
+			}
+		})
+		.then(handleErrors);
 	};
 
 	viewModel.isValidEmail = function() {
@@ -63,6 +65,14 @@ function User(info) {
 	};
 
 	return viewModel;
+}
+
+function handleErrors(response) {
+	if (!response.ok) {
+		console.log(JSON.stringify(response));
+		throw Error(response.statusText);
+	}
+	return response;
 }
 
 module.exports = User;
