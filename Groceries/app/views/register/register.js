@@ -1,6 +1,6 @@
 var dialogsModule = require("ui/dialogs");
-var frameModule = require("ui/frame");
 var formUtil = require("../../shared/utils/form-util");
+var navigation = require("../../shared/navigation");
 var UserViewModel = require("../../shared/view-models/user-view-model");
 
 var user = new UserViewModel({ authenticating: false });
@@ -17,7 +17,7 @@ exports.loaded = function(args) {
 
 	email = page.getViewById("email");
 	password = page.getViewById("password");
-	signUpButton = page.getViewById("signUpButton");
+	signUpButton = page.getViewById("sign-up-button");
 	formUtil.hideKeyboardOnBlur(page, [email, password]);
 };
 
@@ -44,9 +44,7 @@ function completeRegistration() {
 		.then(function() {
 			dialogsModule
 				.alert("Your account was successfully created.")
-				.then(function() {
-					frameModule.topmost().navigate("views/login/login");
-				});
+				.then(navigation.goToLoginPage);
 		}).catch(function() {
 			dialogsModule
 				.alert({

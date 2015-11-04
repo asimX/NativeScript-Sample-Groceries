@@ -1,10 +1,11 @@
 var dialogsModule = require("ui/dialogs");
-var frameModule = require("ui/frame");
-var observableModule = require("data/observable");
-var dependencyObservableModule = require("ui/core/dependency-observable");
+var Observable = require("data/observable").Observable;
+var DependencyObservable = require("ui/core/dependency-observable").DependencyObservable;
 
 var socialShare = require("nativescript-social-share");
 var GroceryListViewModel = require("../../shared/view-models/grocery-list-view-model");
+var actionBarUtil = require("../../shared/utils/action-bar-util");
+var navigation = require("../../shared/navigation");
 
 var page;
 var drawerElement;
@@ -13,7 +14,7 @@ var mainContentElement;
 
 var groceryList = new GroceryListViewModel([]);
 var history = groceryList.history();
-var pageData = new observableModule.Observable({
+var pageData = new Observable({
 	grocery: "",
 	groceryList: groceryList,
 	history: history,
@@ -40,31 +41,37 @@ var pageData = new observableModule.Observable({
 exports.loaded = function(args) {
 	page = args.object;
 	page.bindingContext = pageData;
+	actionBarUtil.styleActionBar();
+	actionBarUtil.hideiOSBackButton();
 
 	drawerElement = page.getViewById("drawer");
 	drawerElement.delegate = new DrawerCallbacksModel();
-	groceryListElement = page.getViewById("groceryList");
-	mainContentElement = page.getViewById("mainContent");
+	groceryListElement = page.getViewById("grocery-list");
+	mainContentElement = page.getViewById("main-content");
 
-	if (page.ios) {
-		// Hide the Back arrow
-		var controller = frameModule.topmost().ios.controller;
-		controller.visibleViewController.navigationItem.setHidesBackButtonAnimated(true, false);
-	}
 	if (page.android) {
 		groceryListElement._swipeExecuteBehavior.setAutoDissolve(false);
 	}
 
 	showPageLoadingIndicator();
-	groceryList.load().then(function() {
-		hidePageLoadingIndicator();
+	groceryList
+		.load()
+		.then(function() {
+			hidePageLoadingIndicator();
 
-		// Fade in the ListView over 1 second
-		groceryListElement.animate({
-			opacity: 1,
-			duration: 1000
+			// Fade in the ListView over 1 second
+			groceryListElement.animate({
+				opacity: 1,
+				duration: 1000
+			});
+		})
+		.catch(function(error) {
+			console.log(error);
+			dialogsModule.alert({
+				message: "An error occurred while loading your grocery list.",
+				okButtonText: "OK"
+			});
 		});
-	});
 };
 
 exports.add = function() {
@@ -88,9 +95,7 @@ exports.add = function() {
 	pageData.set("grocery", "");
 };
 
-exports.signOut = function() {
-	frameModule.topmost().goBack();
-};
+exports.signOut = navigation.signOut;
 
 exports.history = function() {
 	drawerElement.toggleDrawerState();
@@ -149,7 +154,7 @@ exports.shouldRefreshOnPull = function(args) {
 };
 
 function DrawerCallbacksModel() {}
-DrawerCallbacksModel.prototype = new dependencyObservableModule.DependencyObservable();
+DrawerCallbacksModel.prototype = new DependencyObservable();
 DrawerCallbacksModel.prototype.onDrawerOpening = function () {
 	if (page.ios) {
 		mainContentElement.animate({
