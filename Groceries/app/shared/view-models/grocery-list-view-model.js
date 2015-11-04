@@ -1,5 +1,6 @@
 var config = require("../../shared/config");
-var observableArrayModule = require("data/observable-array");
+var ObservableArray = require("data/observable-array").ObservableArray;
+var navigation = require("../navigation");
 
 function indexOf(item) {
 	var match = -1;
@@ -12,8 +13,8 @@ function indexOf(item) {
 }
 
 function GroceryListViewModel(items) {
-	var viewModel = new observableArrayModule.ObservableArray(items);
-	var history = new observableArrayModule.ObservableArray([]);
+	var viewModel = new ObservableArray(items);
+	var history = new ObservableArray([]);
 
 	viewModel.indexOf = indexOf;
 	history.indexOf = indexOf;
@@ -165,6 +166,11 @@ function GroceryListViewModel(items) {
 function handleErrors(response) {
 	if (!response.ok) {
 		console.log(JSON.stringify(response));
+
+		if (response.status === 403) {
+			navigation.signOut();
+		}
+
 		throw Error(response.statusText);
 	}
 	return response;
