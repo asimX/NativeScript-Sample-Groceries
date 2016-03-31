@@ -1,3 +1,4 @@
+var application = require("application");
 var config = require("../../shared/config");
 var ObservableArray = require("data/observable-array").ObservableArray;
 var navigation = require("../navigation");
@@ -16,13 +17,18 @@ function GroceryListViewModel(items) {
 	var viewModel = new ObservableArray(items);
 	var history = new ObservableArray([]);
 
+	// See http://docs.telerik.com/platform/backend-services/rest/queries/queries-sorting
+	// Workaround https://github.com/telerik/nativescript-ui/issues/266
+	var sortExp = { ModifiedAt: application.ios ? -1 : 1 };
+
 	viewModel.indexOf = indexOf;
 	history.indexOf = indexOf;
 
 	viewModel.load = function() {
 		return fetch(config.apiUrl + "Groceries", {
 			headers: {
-				"Authorization": "Bearer " + config.token
+				"Authorization": "Bearer " + config.token,
+				"X-Everlive-Sort": JSON.stringify(sortExp)
 			}
 		})
 		.then(handleErrors)
@@ -80,7 +86,8 @@ function GroceryListViewModel(items) {
 			return response.json();
 		})
 		.then(function(data) {
-			viewModel.push({ name: grocery, id: data.Result.Id });
+			var newGrocery = { name: grocery, id: data.Result.Id };
+			viewModel.unshift(newGrocery);
 		});
 	};
 
@@ -142,10 +149,27 @@ function GroceryListViewModel(items) {
 		.then(handleErrors);
 	};
 
+	viewModel.completelyDelete = function(index) {
+		var item = history.getItem(index);
+		history.splice(index, 1);
+		return fetch(config.apiUrl + "Groceries/" + item.id, {
+			method: "DELETE",
+			headers: {
+				"Authorization": "Bearer " + config.token,
+				"Content-Type": "application/json"
+			}
+		})
+		.then(handleErrors);
+	};
+
+
 	viewModel.toggleDone = function(index) {
 		var item = viewModel.getItem(index);
 		item.done = !item.done;
-		viewModel.setItem(index, item);
+
+		// Use Object.assign to clone the object to ensure NativeScript
+		// detects the change and updates the UI accordingly
+		viewModel.setItem(index, Object.assign({}, item));
 
 		return fetch(config.apiUrl + "Groceries/" + item.id, {
 			method: "PUT",
