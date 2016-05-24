@@ -34,15 +34,15 @@
 	color: #311217;
 }
 
+#grocery-list {
+	background-color: transparent;
+}
 .grocery-list-item-container {
 	padding-top: 10;
 	padding-bottom: 10;
 	padding-left: 16;
 	background-color: white;
 	margin-top: 1;
-}
-.grocery-list-item-container-done {
-	opacity: 0.8;
 }
 .grocery-list-check-box {
 	margin-right: 10;
