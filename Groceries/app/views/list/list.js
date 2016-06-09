@@ -21,16 +21,16 @@ var pageData = new Observable({
 	isShowingRecent: false,
 	toggleDone: function(args) {
 		var item = args.view.bindingContext;
-		var parent = args.view.parent;
+		// var parent = args.view.parent;
 
 		showPageLoadingIndicator();
 		groceryList.toggleDone(groceryList.indexOf(item))
 			.catch(handleAddError)
 			.then(function() {
 				hidePageLoadingIndicator();
-				parent.animate({
+				/*parent.animate({
 					opacity: item.done ? 0.8 : 1
-				});
+				});*/
 			});
 	},
 	toggleHistory: function(args) {
@@ -83,6 +83,13 @@ exports.loaded = function(args) {
 		});
 };
 
+exports.itemLoading = function(args) {
+	var cell = args.ios;
+	if (cell) {
+		cell.backgroundView.backgroundColor = UIColor.clearColor();
+	}
+};
+
 exports.add = function() {
 	if (pageData.get("isShowingRecent")) {
 		return;
@@ -107,7 +114,10 @@ exports.add = function() {
 				okButtonText: "OK"
 			});
 		})
-		.then(hidePageLoadingIndicator);
+		.then(function() {
+			groceryListElement.scrollToIndex(0);
+			hidePageLoadingIndicator();
+		});
 
 	// Clear the textfield
 	pageData.set("grocery", "");
@@ -127,7 +137,7 @@ function addFromHistory() {
 	groceryList.restore()
 		.catch(handleAddError)
 		.then(hidePageLoadingIndicator);
-};
+}
 
 exports.menu = function() {
 	drawerElement.toggleDrawerState();

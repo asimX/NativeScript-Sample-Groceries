@@ -5,5 +5,8 @@
 # NativeScript files
 .tnsproject
 
-# Fitness files
+# Groceries files
 Groceries/README.md
+*.apk
+*.ipa
+.ab/
