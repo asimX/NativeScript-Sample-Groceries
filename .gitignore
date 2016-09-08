@@ -10,3 +10,5 @@ Groceries/README.md
 *.apk
 *.ipa
 .ab/
+node_modules
+**/*.abreferences.d.ts

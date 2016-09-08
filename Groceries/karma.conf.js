@@ -1,5 +1,6 @@
 module.exports = function(config) {
   config.set({
+    browserNoActivityTimeout: 40000,
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '',
@@ -7,7 +8,7 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha', 'chai'],
+    frameworks: ['jasmine'],
 
 
     // list of files / patterns to load in the browser
@@ -30,7 +31,7 @@ module.exports = function(config) {
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['mocha'],
+    reporters: ['progress'],
 
 
     // web server port
